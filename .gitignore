@@ -1,0 +1,7 @@
+runtime/
+logs/
+config.json
+*.edge-temp.mp3
+__pycache__/
+*.pyc
+.venv/
