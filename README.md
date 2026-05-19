@@ -13,6 +13,8 @@ This repository is a **stable MVP framework**. It intentionally starts with push
 ## Features
 
 - Windows PowerShell launcher
+- double-click Tkinter desktop GUI launcher
+- visible GUI states: ready, recording, transcribing, waiting for model, speaking, error
 - push-to-talk recording loop
 - microphone recording to WAV
 - faster-whisper ASR provider
@@ -52,6 +54,14 @@ openclaw-local-voice-conversation/
 ├─ config.openai.example.json
 ├─ config.openclaw-config.example.json
 ├─ start-voice-chat.ps1
+├─ start-gui.ps1
+├─ start-gui.bat
+├─ app/
+│  ├─ main.py
+│  ├─ config/
+│  ├─ services/
+│  ├─ ui/
+│  └─ utils/
 └─ scripts/
    ├─ voice_chat.py
    ├─ record_microphone.py
@@ -93,6 +103,33 @@ copy config.example.json config.json
 ```
 
 If `ffmpeg -version` fails, install ffmpeg and add `ffmpeg.exe` to Windows `PATH`.
+
+## Desktop GUI
+
+Start the desktop assistant by double-clicking `start-gui.bat`, or from PowerShell:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\start-gui.ps1
+```
+
+The GUI shows clear state changes:
+
+- **就绪**: ready for a new turn
+- **录音中**: microphone is recording
+- **识别中**: Whisper ASR is transcribing
+- **等待模型**: waiting for OpenClaw/model response
+- **播报中**: generating or playing Edge TTS audio
+- **错误**: a recoverable error occurred
+
+Use **开始录音** to start, then **停止录音** after speaking. You can also type into the text box and click **发送文本测试** to test the OpenClaw/TTS path without microphone/ASR. Enable **静音/不播放** when you want to generate text/audio without speaker playback.
+
+The GUI performs startup dependency checks and displays Chinese-friendly diagnostics in the reply panel. Long or markdown-heavy model replies are cleaned before TTS so speech is shorter and more natural; the original reply text is still shown and logged.
+
+You can also run the GUI service smoke test without opening a window:
+
+```powershell
+python -m app.main --text "老板你好，测试 GUI 服务。" --no-play
+```
 
 ## Quick smoke test without OpenClaw
 
