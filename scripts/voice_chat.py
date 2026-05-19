@@ -102,6 +102,7 @@ def play_audio(*, audio_path: Path, config: Dict[str, Any], config_path: Path) -
         raise FileNotFoundError(f"Playback script not found: {script}")
 
     timeout_seconds = int(playback.get("timeout_seconds", 60))
+    backend = str(playback.get("backend", "auto")).strip().lower() or "auto"
     command = [
         "powershell",
         "-NoProfile",
@@ -113,6 +114,8 @@ def play_audio(*, audio_path: Path, config: Dict[str, Any], config_path: Path) -
         str(audio_path),
         "-TimeoutSeconds",
         str(timeout_seconds),
+        "-Backend",
+        backend,
     ]
     completed = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", errors="replace", check=False)
     if completed.returncode != 0:

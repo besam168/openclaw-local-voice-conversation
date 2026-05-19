@@ -41,6 +41,7 @@
   },
   "playback": {
     "enabled": true,
+    "backend": "auto",
     "player_script": "./scripts/play-local-audio.ps1",
     "timeout_seconds": 60
   }

@@ -46,7 +46,7 @@ Default mode is push-to-talk / press-to-record:
 - OpenClaw config adapter that reads `~/.openclaw/openclaw.json`
 - multi-turn conversation history for model adapters
 - Edge TTS reply generation
-- local WAV playback through Windows `SoundPlayer`
+- local WAV playback through Windows `SoundPlayer` with MCI fallback
 - UTF-8 JSONL session logging
 
 ## Non-goals for v1

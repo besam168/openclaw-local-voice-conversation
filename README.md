@@ -18,7 +18,7 @@ This repository is a **stable MVP framework**. It intentionally starts with push
 - faster-whisper ASR provider
 - Edge TTS reply voice
 - ffmpeg WAV conversion for TTS output
-- local speaker playback using Windows `SoundPlayer`
+- local speaker playback using Windows `SoundPlayer` with MCI fallback
 - OpenClaw adapters:
   - `echo` for smoke tests
   - `http` for local HTTP APIs
@@ -172,7 +172,8 @@ Main sections:
     "output_dir": "./runtime/reply"
   },
   "playback": {
-    "enabled": true
+    "enabled": true,
+    "backend": "auto"
   }
 }
 ```
@@ -412,6 +413,30 @@ Restart PowerShell after changing `PATH`.
 - Open it manually in Windows Media Player.
 - Check Windows speaker device and volume mixer.
 - Run with `-NoPlay` to separate TTS generation from playback.
+- Test the playback script directly:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\play-local-audio.ps1 -AudioPath "runtime\reply\reply-file.wav"
+```
+
+- If `SoundPlayer` reports success but you still hear nothing, try the MCI backend:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\play-local-audio.ps1 -AudioPath "runtime\reply\reply-file.wav" -Backend mci
+```
+
+You can also set this in `config.json`:
+
+```json
+"playback": {
+  "enabled": true,
+  "backend": "mci",
+  "player_script": "./scripts/play-local-audio.ps1",
+  "timeout_seconds": 60
+}
+```
+
+The script prints `PLAYBACK_CONFIRMED=1` when the Windows playback API returns success. If that appears but there is still no audible sound, check the Windows default output device, mute state, mixer volume, Bluetooth/headphone routing, or remote desktop audio settings.
 
 ### OpenClaw does not reply
 
