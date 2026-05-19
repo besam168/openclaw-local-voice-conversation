@@ -19,30 +19,9 @@
     "beam_size": 5
   },
   "openclaw": {
-    "adapter": "echo",
-    "echo_prefix": "OpenClaw 收到：",
+    "adapter": "openclaw_config",
     "system_prompt": "你是 OpenClaw 本地电脑端语音对话助手。回答要自然、简洁，适合直接语音播报。",
     "max_history_messages": 12,
-    "http": {
-      "url": "http://127.0.0.1:8765/chat",
-      "timeout_seconds": 60,
-      "request_text_field": "text",
-      "response_text_field": "reply",
-      "include_history": true
-    },
-    "command": {
-      "program": "python",
-      "args": ["C:/path/to/openclaw_chat.py", "{text}"],
-      "timeout_seconds": 120
-    },
-    "openai": {
-      "base_url": "https://api.openai.com/v1",
-      "api_key": "env:OPENAI_API_KEY",
-      "model": "gpt-4o-mini",
-      "timeout_seconds": 120,
-      "max_tokens": 1024,
-      "temperature": 0.6
-    },
     "openclaw_config": {
       "path": "~/.openclaw/openclaw.json",
       "provider": "",

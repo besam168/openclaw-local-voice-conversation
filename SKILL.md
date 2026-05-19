@@ -40,8 +40,11 @@ Default mode is push-to-talk / press-to-record:
 - microphone recording
 - faster-whisper ASR provider
 - placeholder/echo OpenClaw adapter for smoke testing
-- HTTP OpenClaw adapter for future real integration
+- HTTP OpenClaw adapter for local APIs
 - command adapter for invoking an OpenClaw CLI or script
+- OpenAI-compatible chat/completions adapter
+- OpenClaw config adapter that reads `~/.openclaw/openclaw.json`
+- multi-turn conversation history for model adapters
 - Edge TTS reply generation
 - local WAV playback through Windows `SoundPlayer`
 - UTF-8 JSONL session logging
@@ -61,8 +64,12 @@ Default mode is push-to-talk / press-to-record:
 Copy `config.example.json` to `config.json`, then choose your OpenClaw adapter:
 
 - `echo`: smoke test without OpenClaw
-- `http`: POST text to a local OpenClaw HTTP endpoint
+- `http`: POST text, and optionally history, to a local OpenClaw HTTP endpoint
 - `command`: invoke an OpenClaw CLI/script and read stdout
+- `openai`: call any OpenAI-compatible `/v1/chat/completions` provider using `openclaw.openai`
+- `openclaw_config`: read provider/model settings from `~/.openclaw/openclaw.json`
+
+Keep secrets out of git. Prefer values such as `"api_key": "env:OPENAI_API_KEY"` in `config.json`.
 
 ## Output
 

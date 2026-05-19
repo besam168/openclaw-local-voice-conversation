@@ -23,6 +23,8 @@ This repository is a **stable MVP framework**. It intentionally starts with push
   - `echo` for smoke tests
   - `http` for local HTTP APIs
   - `command` for CLI/script integration
+  - `openai` for any OpenAI-compatible chat/completions API
+  - `openclaw_config` for reading a provider from `~/.openclaw/openclaw.json`
 - JSONL conversation logs
 - UTF-8 Chinese-friendly console output
 
@@ -47,6 +49,8 @@ openclaw-local-voice-conversation/
 ├─ LICENSE
 ├─ requirements.txt
 ├─ config.example.json
+├─ config.openai.example.json
+├─ config.openclaw-config.example.json
 ├─ start-voice-chat.ps1
 └─ scripts/
    ├─ voice_chat.py
@@ -123,10 +127,23 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\start-voice-chat.ps1 -Text
 
 ## Configuration
 
-Copy:
+Copy one of the example configs to `config.json`:
 
 ```powershell
 copy config.example.json config.json
+```
+
+For a direct OpenAI-compatible provider:
+
+```powershell
+copy config.openai.example.json config.json
+$env:OPENAI_API_KEY="your_api_key_here"
+```
+
+For a provider already configured in OpenClaw:
+
+```powershell
+copy config.openclaw-config.example.json config.json
 ```
 
 Main sections:
@@ -175,7 +192,7 @@ Good for local smoke testing:
 
 ### 2. `http` adapter
 
-Use this when OpenClaw exposes a local HTTP endpoint:
+Use this when OpenClaw exposes a local HTTP endpoint. Set `include_history` to `true` if the endpoint accepts a `history` array with previous `{role, content}` messages:
 
 ```json
 "openclaw": {
@@ -184,7 +201,8 @@ Use this when OpenClaw exposes a local HTTP endpoint:
     "url": "http://127.0.0.1:8765/chat",
     "timeout_seconds": 60,
     "request_text_field": "text",
-    "response_text_field": "reply"
+    "response_text_field": "reply",
+    "include_history": true
   }
 }
 ```
@@ -223,6 +241,63 @@ Use this when OpenClaw can be called with a local command or script:
 ```
 
 `{text}` in args is replaced with the recognized user text. The adapter reads stdout. If stdout is JSON, it looks for `reply`, `text`, `content`, or `message`; otherwise stdout itself is used as the reply.
+
+### 4. `openai` adapter
+
+Use this for OpenAI or any OpenAI-compatible `/v1/chat/completions` provider:
+
+```powershell
+copy config.openai.example.json config.json
+$env:OPENAI_API_KEY="your_api_key_here"
+```
+
+```json
+"openclaw": {
+  "adapter": "openai",
+  "system_prompt": "你是 OpenClaw 本地电脑端语音对话助手。回答要自然、简洁，适合直接语音播报。",
+  "max_history_messages": 12,
+  "openai": {
+    "base_url": "https://api.openai.com/v1",
+    "api_key": "env:OPENAI_API_KEY",
+    "model": "gpt-4o-mini",
+    "timeout_seconds": 120,
+    "max_tokens": 1024,
+    "temperature": 0.6
+  }
+}
+```
+
+`api_key` supports `env:NAME` so secrets stay outside git. `base_url` may be either `https://host` or `https://host/v1`; the adapter normalizes it to `/v1/chat/completions`.
+
+### 5. `openclaw_config` adapter
+
+Use this when OpenClaw already has a model provider in `~/.openclaw/openclaw.json`:
+
+```powershell
+copy config.openclaw-config.example.json config.json
+```
+
+```json
+"openclaw": {
+  "adapter": "openclaw_config",
+  "system_prompt": "你是 OpenClaw 本地电脑端语音对话助手。回答要自然、简洁，适合直接语音播报。",
+  "max_history_messages": 12,
+  "openclaw_config": {
+    "path": "~/.openclaw/openclaw.json",
+    "provider": "",
+    "model": "",
+    "timeout_seconds": 120,
+    "max_tokens": 1024,
+    "temperature": 0.6
+  }
+}
+```
+
+If `provider` or `model` is blank, the adapter uses the first usable provider/model it can discover. Do not copy `~/.openclaw/openclaw.json` into this repository because it may contain API keys.
+
+### Multi-turn history
+
+The `openai` and `openclaw_config` adapters include recent conversation turns as chat messages. `max_history_messages` controls how many previous user/assistant messages are kept; set it to `0` to disable memory. The `http` adapter can also send history when `http.include_history` is `true`.
 
 ## ASR notes
 

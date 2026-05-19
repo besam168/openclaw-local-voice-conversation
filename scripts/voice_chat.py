@@ -132,13 +132,20 @@ def handle_text_turn(
     config_path: Path,
     log_path: Path,
     no_play: bool,
+    history: list[dict[str, str]],
     input_audio_path: Path | None = None,
 ) -> Dict[str, Any]:
     user_text = normalize_text(user_text, config)
     print(f"你：{user_text}")
 
-    reply_text = normalize_text(get_openclaw_reply(text=user_text, config=config), config)
+    reply_text = normalize_text(get_openclaw_reply(text=user_text, config=config, history=history), config)
     print(f"OpenClaw：{reply_text}")
+
+    history.append({"role": "user", "content": user_text})
+    history.append({"role": "assistant", "content": reply_text})
+    max_history_messages = int((config.get("openclaw") or {}).get("max_history_messages", 12))
+    if max_history_messages > 0 and len(history) > max_history_messages:
+        del history[:-max_history_messages]
 
     reply_audio_path = synthesize_reply(text=reply_text, config=config, config_path=config_path)
 
@@ -155,6 +162,7 @@ def handle_text_turn(
         "input_audio_path": str(input_audio_path) if input_audio_path else None,
         "reply_audio_path": str(reply_audio_path),
         "played": playback_enabled,
+        "history_messages": len(history),
         "playback_result": playback_result,
     }
     append_jsonl(log_path, turn)
@@ -167,6 +175,7 @@ def run_interactive_loop(*, config: Dict[str, Any], config_path: Path, log_path:
     print("按 Enter 开始录音；录音中再按 Enter 停止；输入 q 回车退出。")
     max_turns = int((config.get("conversation") or {}).get("max_turns", 0))
     turn_count = 0
+    history: list[dict[str, str]] = []
 
     while True:
         command = input("\n[Enter=开始录音, q=退出] > ").strip().lower()
@@ -187,6 +196,7 @@ def run_interactive_loop(*, config: Dict[str, Any], config_path: Path, log_path:
             config_path=config_path,
             log_path=log_path,
             no_play=no_play,
+            history=history,
             input_audio_path=input_audio_path,
         )
 
@@ -223,6 +233,7 @@ def main() -> None:
                 config_path=config_path,
                 log_path=log_path,
                 no_play=args.no_play,
+                history=[],
             )
             return
 
